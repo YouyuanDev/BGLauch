@@ -12,6 +12,7 @@ using System.Net;
 using System.IO;
 using System.Xml;
 using System.Threading;
+using System.Diagnostics;
 
 namespace BGLauch
 {
@@ -57,18 +58,26 @@ namespace BGLauch
                         
                         if (!serverVersion.Equals(nowVersion))
                         {
-                            string processPath = Application.StartupPath + "\\bin\\YYOPInspectionClient.exe";
                             AutoUpdater.Start("http://192.168.0.200:8080/upload/clientapp/ClientAPPAutoUpdater.xml");
-                            //找到更新的文件的内容
-                            //Application.Exit();
-                            //AutoUpdater.DownloadUpdate();
                         }
                         else
                         {
-                            //MessageBox.Show("333");
-                            //执行B程序
-                            ExecuteBProgram();
+                           
                             //Application.Exit();
+                            string sourcePath = Application.StartupPath+"\\bin";
+                            string destPath = Application.StartupPath + "\\OPClientBin\\bin";
+                            if (Directory.Exists(sourcePath)) {
+                                if (Directory.Exists(destPath))
+                                {
+                                    MessageBox.Show(destPath);
+                                    MoveFolder(sourcePath,destPath);
+                                    Directory.Delete(sourcePath,true);
+                                }
+                                else {
+                                    Directory.CreateDirectory(destPath);
+                                }
+                            }
+                            ExecuteBProgram();
                         }
                     }
                 }
@@ -85,6 +94,8 @@ namespace BGLauch
             if (!string.IsNullOrWhiteSpace(newVersion)) {
                 File.WriteAllText(versionPath,newVersion);
                 MessageBox.Show("更新完毕,请重启!");
+                //更改文件夹
+                Application.Exit();
                 System.Environment.Exit(0);
                 //ExecuteBProgram();
             }
@@ -92,7 +103,7 @@ namespace BGLauch
         
         public static  void ExecuteBProgram()
         {
-            string processPath = Application.StartupPath + "\\bin\\YYOPInspectionClient.exe";
+            string processPath = Application.StartupPath + "\\OPClientBin\\bin\\YYOPInspectionClient.exe";
             //MessageBox.Show(processPath);
             if (File.Exists(processPath)) {
                 //MessageBox.Show("有");
@@ -132,28 +143,52 @@ namespace BGLauch
             sr.Close();
             return str_read;
         }
-       
-        //private void GetProcessPathOfB(string dir)
-        //{
-        //    DirectoryInfo d = new DirectoryInfo(dir);
-        //    FileSystemInfo[] fsinfos = d.GetFileSystemInfos();
-        //    foreach (FileSystemInfo fsinfo in fsinfos)
-        //    {
-        //        if (fsinfo is DirectoryInfo)     //判断是否为文件夹
-        //        {
-        //            GetProcessPathOfB(fsinfo.FullName);//递归调用
-        //        }
-        //        else
-        //        {
-        //            //fsinfo.Name;
-        //            if (fsinfo.Name.Equals("Chat.exe")) {
-        //                processPath = fsinfo.FullName;
-        //            }
-        //            Console.WriteLine(fsinfo.FullName);//输出文件的全部路径
-        //        }
-        //    }
 
+        public void MoveFolder(string sourcePath, string destPath)
+        {
+            if (Directory.Exists(sourcePath))
+            {
+                if (!Directory.Exists(destPath))
+                {
+                    //目标目录不存在则创建
+                    try
+                    {
+                        Directory.CreateDirectory(destPath);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception("创建目标目录失败：" + ex.Message);
+                    }
+                }
+                //获得源文件下所有文件
+                List<string> files = new List<string>(Directory.GetFiles(sourcePath));
+                files.ForEach(c =>
+                {
+                    string destFile = Path.Combine(new string[] { destPath, Path.GetFileName(c) });
+                    //覆盖模式
+                    if (File.Exists(destFile))
+                    {
+                        File.Delete(destFile);
+                    }
+                    File.Move(c, destFile);
+                });
+                //获得源文件下所有目录文件
+                List<string> folders = new List<string>(Directory.GetDirectories(sourcePath));
 
-        //}
+                folders.ForEach(c =>
+                {
+                    string destDir = Path.Combine(new string[] { destPath, Path.GetFileName(c) });
+                    //Directory.Move必须要在同一个根目录下移动才有效，不能在不同卷中移动。
+                    //Directory.Move(c, destDir);
+
+                    //采用递归的方法实现
+                    MoveFolder(c, destDir);
+                });
+            }
+            else
+            {
+                Console.WriteLine("源目录不存在！");
+            }
+        }
     }
 }

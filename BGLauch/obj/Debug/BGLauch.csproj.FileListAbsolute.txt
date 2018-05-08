@@ -4,7 +4,6 @@ C:\Workspace\BGLauch\BGLauch\bin\Debug\BGLauch.pdb
 C:\Workspace\BGLauch\BGLauch\bin\Debug\AutoUpdater.NET.dll
 C:\Workspace\BGLauch\BGLauch\bin\Debug\AutoUpdater.NET.pdb
 C:\Workspace\BGLauch\BGLauch\bin\Debug\AutoUpdater.NET.xml
-C:\Workspace\BGLauch\BGLauch\obj\Debug\BGLauch.csprojResolveAssemblyReference.cache
 C:\Workspace\BGLauch\BGLauch\obj\Debug\BGLauch.Form1.resources
 C:\Workspace\BGLauch\BGLauch\obj\Debug\BGLauch.Properties.Resources.resources
 C:\Workspace\BGLauch\BGLauch\obj\Debug\BGLauch.csproj.GenerateResource.Cache
