@@ -20,102 +20,116 @@ namespace BGLauch
     {
         private string processPath = null;
         private string newVersion = "";
+        #region 构造函数
         public Form1()
         {
             InitializeComponent();
-
             try
             {
+                this.Hide();
                 AutoUpdater.ApplicationExitEvent += AutoUpdater_ApplicationExitEvent;
-                string url = "http://192.168.0.200:8080/upload/clientapp/ClientAPPAutoUpdater.xml";
-                string filePath = Application.StartupPath + "\\version.xml";
-                string versionPath = Application.StartupPath + "\\version.txt";
-                HttpWebRequest request = HttpWebRequest.Create(url) as HttpWebRequest;
-                request.Method = "GET";
-                HttpWebResponse response = request.GetResponse() as HttpWebResponse;
-                // 转换为byte类型
-                System.IO.Stream stream = response.GetResponseStream();
-                //创建本地文件写入流
-                Stream fs = new FileStream(filePath, FileMode.Create);
-                byte[] bArr = new byte[1024];
-                int size = stream.Read(bArr, 0, (int)bArr.Length);
-                while (size > 0)
+                string ipAndPort = GetServerIPAndPort();
+                if (ipAndPort != null)
                 {
-                    fs.Write(bArr, 0, size);
-                    size = stream.Read(bArr, 0, (int)bArr.Length);
-                }
-                fs.Close();
-                stream.Close();
-                Version entiy = AnalysisXml(filePath);
-                string serverVersion = entiy.version.Trim();
-                newVersion = serverVersion;
-                string nowVersion = ReadVersion(versionPath).Trim();
-                //MessageBox.Show(.Length+":"+nowVersion.Trim().Length);
-                if (entiy != null)
-                {
-                    if (!string.IsNullOrWhiteSpace(nowVersion))
+                    string url = "http://"+ipAndPort.Trim()+"/upload/clientapp/ClientAPPAutoUpdater.xml";
+                    string filePath = Application.StartupPath + "\\version.xml";
+                    string versionPath = Application.StartupPath + "\\version.txt";
+                    HttpWebRequest request = HttpWebRequest.Create(url) as HttpWebRequest;
+                    request.Method = "GET";
+                    HttpWebResponse response = request.GetResponse() as HttpWebResponse;
+                    // 转换为byte类型
+                    System.IO.Stream stream = response.GetResponseStream();
+                    //创建本地文件写入流
+                    Stream fs = new FileStream(filePath, FileMode.Create);
+                    byte[] bArr = new byte[1024];
+                    int size = stream.Read(bArr, 0, (int)bArr.Length);
+                    while (size > 0)
                     {
-                        
-                        if (!serverVersion.Equals(nowVersion))
+                        fs.Write(bArr, 0, size);
+                        size = stream.Read(bArr, 0, (int)bArr.Length);
+                    }
+                    fs.Close();
+                    stream.Close();
+                    Version entiy = AnalysisXml(filePath);
+                    string serverVersion = entiy.version.Trim();
+                    newVersion = serverVersion;
+                    string nowVersion = ReadVersion(versionPath).Trim();
+                    //MessageBox.Show(.Length+":"+nowVersion.Trim().Length);
+                    if (entiy != null)
+                    {
+                        if (!string.IsNullOrWhiteSpace(nowVersion))
                         {
-                            AutoUpdater.Start("http://192.168.0.200:8080/upload/clientapp/ClientAPPAutoUpdater.xml");
-                        }
-                        else
-                        {
-                           
-                            //Application.Exit();
-                            string sourcePath = Application.StartupPath+"\\bin";
-                            string destPath = Application.StartupPath + "\\OPClientBin\\bin";
-                            if (Directory.Exists(sourcePath)) {
-                                if (Directory.Exists(destPath))
-                                {
-                                    MessageBox.Show(destPath);
-                                    MoveFolder(sourcePath,destPath);
-                                    Directory.Delete(sourcePath,true);
-                                }
-                                else {
-                                    Directory.CreateDirectory(destPath);
-                                }
+
+                            if (!serverVersion.Equals(nowVersion))
+                            {
+                                AutoUpdater.Start("http://"+ipAndPort.Trim()+"/upload/clientapp/ClientAPPAutoUpdater.xml");
+                                Application.Exit();
                             }
-                            ExecuteBProgram();
+                            else
+                            {
+                                //Application.Exit();
+                                string sourcePath = Application.StartupPath + "\\bin";
+                                string destPath = Application.StartupPath + "\\OPClientBin\\bin";
+                                if (Directory.Exists(sourcePath))
+                                {
+                                    if (Directory.Exists(destPath))
+                                    {
+                                        MoveFolder(sourcePath, destPath);
+                                        Directory.Delete(sourcePath, true);
+                                    }
+                                    else
+                                    {
+                                        Directory.CreateDirectory(destPath);
+                                    }
+                                }
+                                ExecuteBProgram();
+                            }
                         }
                     }
                 }
+                else {
+                    MessageBox.Show("连接服务器失败,请稍后重启!");
+                }
             }
-            catch (Exception e) {
+            catch (Exception e)
+            {
                 Console.WriteLine("检测更新时失败......");
             }
-        }
+        } 
+        #endregion
 
+        #region 更新完成事件
         private void AutoUpdater_ApplicationExitEvent()
         {
-           
+
             string versionPath = Application.StartupPath + "\\version.txt";
-            if (!string.IsNullOrWhiteSpace(newVersion)) {
-                File.WriteAllText(versionPath,newVersion);
+            if (!string.IsNullOrWhiteSpace(newVersion))
+            {
+                File.WriteAllText(versionPath, newVersion);
                 MessageBox.Show("更新完毕,请重启!");
-                //更改文件夹
                 Application.Exit();
-                System.Environment.Exit(0);
-                //ExecuteBProgram();
+                //System.Environment.Exit(0);
+                //Application.Exit();
             }
-        }
-        
-        public static  void ExecuteBProgram()
+        } 
+        #endregion
+
+        #region 执行B程序
+        public static void ExecuteBProgram()
         {
             string processPath = Application.StartupPath + "\\OPClientBin\\bin\\YYOPInspectionClient.exe";
-            //MessageBox.Show(processPath);
-            if (File.Exists(processPath)) {
-                //MessageBox.Show("有");
+            if (File.Exists(processPath))
+            {
                 System.Diagnostics.Process.Start(processPath);
-                //Thread.Sleep(1000);
-                //Application.Exit();
-                System.Environment.Exit(0);
             }
-           
-        }
+            System.Environment.Exit(0);
+            Application.Exit();
+        } 
+        #endregion
 
-        public Version AnalysisXml(string xmlPath) {
+        #region 解析XML文件
+        public Version AnalysisXml(string xmlPath)
+        {
             List<Version> tmpList = new List<Version>();
             XmlDocument xmlDoc = new XmlDocument();
             xmlDoc.Load(xmlPath);
@@ -123,7 +137,7 @@ namespace BGLauch
             foreach (XmlNode node in nodelist)
             {
                 Version entity = new Version();
-                entity.version =node["version"].InnerText;
+                entity.version = node["version"].InnerText;
                 entity.url = node["url"].InnerText;
                 entity.changelog = node["changelog"].InnerText;
                 entity.mandatory = node["mandatory"].InnerText;
@@ -133,17 +147,24 @@ namespace BGLauch
             {
                 return tmpList[0];
             }
-            else {
+            else
+            {
                 return null;
             }
-        }
-        private string ReadVersion(string path) {
+        } 
+        #endregion
+
+        #region 读取配置文件版本号
+        private string ReadVersion(string path)
+        {
             StreamReader sr = new StreamReader(path);
             String str_read = sr.ReadToEnd();
             sr.Close();
             return str_read;
-        }
+        } 
+        #endregion
 
+        #region 移动文件夹到指定位置
         public void MoveFolder(string sourcePath, string destPath)
         {
             if (Directory.Exists(sourcePath))
@@ -190,5 +211,27 @@ namespace BGLauch
                 Console.WriteLine("源目录不存在！");
             }
         }
+        #endregion
+
+        #region 获取配置文件的IP和Port
+        private string GetServerIPAndPort()
+        {
+            string ipAndPort =null;
+            try {
+                string configPath = Application.StartupPath + "\\config.txt";
+                string str = File.ReadAllText(configPath);
+                str = str.Replace("\n", "");
+                string[] strIPArray = str.Split('\r');
+                if (strIPArray.Length > 0)
+                {
+                    ipAndPort = strIPArray[0];
+                }
+            }
+            catch (Exception e) {
+                Console.WriteLine("获取IP和Port时出错!");
+            }
+            return ipAndPort;
+        } 
+        #endregion
     }
 }
