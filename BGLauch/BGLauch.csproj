@@ -71,6 +71,9 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <None Include="bin\Debug\BGLauch.exe.config" />
+    <None Include="bin\Debug\BGLauch.vshost.exe.config" />
+    <None Include="bin\Debug\BGLauch.vshost.exe.manifest" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -86,7 +89,15 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="bin\Debug\AutoUpdater.NET.dll" />
+    <Content Include="bin\Debug\AutoUpdater.NET.pdb" />
+    <Content Include="bin\Debug\AutoUpdater.NET.xml" />
+    <Content Include="bin\Debug\BGLauch.exe" />
+    <Content Include="bin\Debug\BGLauch.pdb" />
+    <Content Include="bin\Debug\BGLauch.vshost.exe" />
+    <Content Include="bin\Debug\config.txt" />
     <Content Include="bin\Debug\version.txt" />
+    <Content Include="bin\Debug\version.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

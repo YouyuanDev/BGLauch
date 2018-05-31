@@ -18,12 +18,13 @@ namespace BGLauch
 {
     public partial class Form1 : Form
     {
-        private string processPath = null;
+        //private string processPath = null;
         private string newVersion = "";
         #region 构造函数
         public Form1()
         {
             InitializeComponent();
+            //AutoUpdater.Start("http://192.168.0.200:8081/upload/clientapp/ClientAPPAutoUpdater.xml");
             try
             {
                 this.Hide();
@@ -31,11 +32,11 @@ namespace BGLauch
                 string ipAndPort = GetServerIPAndPort();
                 if (ipAndPort != null)
                 {
-                    string url = "http://"+ipAndPort.Trim()+"/upload/clientapp/ClientAPPAutoUpdater.xml";
+                    string url = "http://" + ipAndPort.Trim() + "/spjzweb/upload/clientapp/ClientAPPAutoUpdater.xml";
                     string filePath = Application.StartupPath + "\\version.xml";
                     string versionPath = Application.StartupPath + "\\version.txt";
                     HttpWebRequest request = HttpWebRequest.Create(url) as HttpWebRequest;
-                    request.Method = "GET";
+                    request.Method = "POST";
                     HttpWebResponse response = request.GetResponse() as HttpWebResponse;
                     // 转换为byte类型
                     System.IO.Stream stream = response.GetResponseStream();
@@ -54,15 +55,14 @@ namespace BGLauch
                     string serverVersion = entiy.version.Trim();
                     newVersion = serverVersion;
                     string nowVersion = ReadVersion(versionPath).Trim();
-                    //MessageBox.Show(.Length+":"+nowVersion.Trim().Length);
                     if (entiy != null)
                     {
                         if (!string.IsNullOrWhiteSpace(nowVersion))
                         {
-
                             if (!serverVersion.Equals(nowVersion))
                             {
-                                AutoUpdater.Start("http://"+ipAndPort.Trim()+"/upload/clientapp/ClientAPPAutoUpdater.xml");
+                                MessageBox.Show(nowVersion);
+                                AutoUpdater.Start("http://192.168.0.200:8081/upload/clientapp/ClientAPPAutoUpdater.xml");
                                 Application.Exit();
                             }
                             else
@@ -87,31 +87,32 @@ namespace BGLauch
                         }
                     }
                 }
-                else {
+                else
+                {
                     MessageBox.Show("连接服务器失败,请稍后重启!");
+                    Application.Exit();
                 }
             }
             catch (Exception e)
             {
-                Console.WriteLine("检测更新时失败......");
+                MessageBox.Show("检测更新失败,请稍后重启!");
+                Application.Exit();
             }
-        } 
+        }
         #endregion
 
         #region 更新完成事件
         private void AutoUpdater_ApplicationExitEvent()
         {
-
+            
             string versionPath = Application.StartupPath + "\\version.txt";
             if (!string.IsNullOrWhiteSpace(newVersion))
             {
                 File.WriteAllText(versionPath, newVersion);
                 MessageBox.Show("更新完毕,请重启!");
                 Application.Exit();
-                //System.Environment.Exit(0);
-                //Application.Exit();
             }
-        } 
+        }
         #endregion
 
         #region 执行B程序
@@ -124,7 +125,7 @@ namespace BGLauch
             }
             System.Environment.Exit(0);
             Application.Exit();
-        } 
+        }
         #endregion
 
         #region 解析XML文件
@@ -151,7 +152,7 @@ namespace BGLauch
             {
                 return null;
             }
-        } 
+        }
         #endregion
 
         #region 读取配置文件版本号
@@ -161,7 +162,7 @@ namespace BGLauch
             String str_read = sr.ReadToEnd();
             sr.Close();
             return str_read;
-        } 
+        }
         #endregion
 
         #region 移动文件夹到指定位置
@@ -216,8 +217,9 @@ namespace BGLauch
         #region 获取配置文件的IP和Port
         private string GetServerIPAndPort()
         {
-            string ipAndPort =null;
-            try {
+            string ipAndPort = null;
+            try
+            {
                 string configPath = Application.StartupPath + "\\config.txt";
                 string str = File.ReadAllText(configPath);
                 str = str.Replace("\n", "");
@@ -227,11 +229,12 @@ namespace BGLauch
                     ipAndPort = strIPArray[0];
                 }
             }
-            catch (Exception e) {
+            catch (Exception e)
+            {
                 Console.WriteLine("获取IP和Port时出错!");
             }
             return ipAndPort;
-        } 
+        }
         #endregion
     }
 }

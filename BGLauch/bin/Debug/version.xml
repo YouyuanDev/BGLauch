@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <item>
     <version>3.0.0.0</version>
-    <url>http://192.168.0.200:8080/upload/clientapp/OPClientBin.zip</url>
-    <changelog>http://192.168.0.200:8080/upload/clientapp/readme.txt</changelog>
+    <url>http://192.168.0.200:8081/upload/clientapp/OPClientBin.zip</url>
+    <changelog>http://192.168.0.200:8081/upload/clientapp/readme.txt</changelog>
     <mandatory>false</mandatory>
 </item>
