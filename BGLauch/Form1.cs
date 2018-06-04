@@ -61,8 +61,8 @@ namespace BGLauch
                         {
                             if (!serverVersion.Equals(nowVersion))
                             {
-                                MessageBox.Show(nowVersion);
-                                AutoUpdater.Start("http://192.168.0.200:8081/upload/clientapp/ClientAPPAutoUpdater.xml");
+                                string downloadUrl ="http://"+GetServerIPAndPort()+ "/upload/clientapp/ClientAPPAutoUpdater.xml";
+                                AutoUpdater.Start(downloadUrl);
                                 Application.Exit();
                             }
                             else
