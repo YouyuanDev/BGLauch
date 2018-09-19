@@ -18,21 +18,22 @@ namespace BGLauch
 {
     public partial class Form1 : Form
     {
-        //private string processPath = null;
+        //定义新的版本号
         private string newVersion = "";
         #region 构造函数
         public Form1()
         {
             InitializeComponent();
-            //AutoUpdater.Start("http://192.168.0.200:8081/upload/clientapp/ClientAPPAutoUpdater.xml");
             try
             {
                 this.Hide();
+                //自动更新的退出事件
                 AutoUpdater.ApplicationExitEvent += AutoUpdater_ApplicationExitEvent;
+                //获取服务器ip和端口号
                 string ipAndPort = GetServerIPAndPort();
                 if (ipAndPort != null)
                 {
-                    string url = "http://" + ipAndPort.Trim() + "/spjzweb/upload/clientapp/ClientAPPAutoUpdater.xml";
+                    string url = "http://" + ipAndPort.Trim() + "/upload/clientapp/ClientAPPAutoUpdater.xml";
                     string filePath = Application.StartupPath + "\\version.xml";
                     string versionPath = Application.StartupPath + "\\version.txt";
                     HttpWebRequest request = HttpWebRequest.Create(url) as HttpWebRequest;
@@ -104,10 +105,11 @@ namespace BGLauch
         #region 更新完成事件
         private void AutoUpdater_ApplicationExitEvent()
         {
-            
+            //获取存放版本好的文件
             string versionPath = Application.StartupPath + "\\version.txt";
             if (!string.IsNullOrWhiteSpace(newVersion))
             {
+                //将新的版本号存入文件中
                 File.WriteAllText(versionPath, newVersion);
                 MessageBox.Show("更新完毕,请重启!");
                 Application.Exit();
@@ -118,11 +120,14 @@ namespace BGLauch
         #region 执行B程序
         public static void ExecuteBProgram()
         {
+            //获取B程序路径
             string processPath = Application.StartupPath + "\\OPClientBin\\bin\\YYOPInspectionClient.exe";
             if (File.Exists(processPath))
             {
+                //启动B程序
                 System.Diagnostics.Process.Start(processPath);
             }
+            //关闭A程序
             System.Environment.Exit(0);
             Application.Exit();
         }
@@ -200,9 +205,6 @@ namespace BGLauch
                 folders.ForEach(c =>
                 {
                     string destDir = Path.Combine(new string[] { destPath, Path.GetFileName(c) });
-                    //Directory.Move必须要在同一个根目录下移动才有效，不能在不同卷中移动。
-                    //Directory.Move(c, destDir);
-
                     //采用递归的方法实现
                     MoveFolder(c, destDir);
                 });
